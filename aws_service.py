@@ -32,7 +32,7 @@ def ses_send_email(target_email_address: str,
     try:
         ses_client.send_email(
             Source=target_email_address,
-            Destination=target_email_address,
+            Destination={'ToAddresses': [target_email_address]},
             Message=message
         )
         logger.info("Email send successfully: target - %s, body - %s",

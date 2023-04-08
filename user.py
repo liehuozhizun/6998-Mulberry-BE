@@ -12,14 +12,14 @@ def signup(event) -> dict:
 
     # Create new user record in DynamoDB
     db = aws_service.dynamo_client_factory("user")
-    if db.get_item(Key={'email': data['email']}).get('Item') is None:
+    if db.get_item(Key={'email': data['email']}).get('Item') is not None:
         logger.error("Signup failed: email already exists - %s", data['email'])
         return {'status': 'fail', 'message': 'email already exists'}
     db.put_item(Item={'email': data['email'], 'password': data['password']})
 
     # Automatically send a verification email
     ses_success = aws_service.ses_send_email(
-        target_email_address='hy2784@gmail.com',
+        target_email_address=data['email'],
         subject='Welcome to Mulberry! Please verify your email!',
         body='Hi<br>Please click this link to verify your email: ' + 'xxx' + '<br>' +
         'Your verification link will expire in 30 minutes.'
