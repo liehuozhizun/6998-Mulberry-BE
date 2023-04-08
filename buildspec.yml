@@ -5,6 +5,7 @@ phases:
       python: 3.9
     commands:
       - echo "Installing dependencies..."
+      - pip install redis
   build:
     commands:
       - echo "Zipping upload package..."
