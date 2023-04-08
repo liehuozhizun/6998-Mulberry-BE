@@ -18,7 +18,7 @@ def request_dispatcher(event, context):
                          event['resource'], module_name)
             return {
                 'statusCode': 400,
-                'body': '{"message":"No proper handler found for the endpoint"}'
+                'body': '{"status": "fail", "message":"No proper handler found for the endpoint"}'
             }
 
         module = importlib.import_module(module_name)
@@ -37,7 +37,7 @@ def request_dispatcher(event, context):
         logger.error(e)
         return {
             'statusCode': 500,
-            'body': '{"message":"Unhandled Exception occurs"}'
+            'body': '{"status": "fail", "message":"Unhandled Exception occurs"}'
         }
 
 

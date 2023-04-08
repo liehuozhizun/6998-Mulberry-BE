@@ -9,9 +9,26 @@ logger.setLevel(logging.INFO)
 def signup(event) -> dict:
     logger.info("signup")
     data = json.loads(event['body'])
+
+    # Create new user record in DynamoDB
     db = aws_service.dynamo_client_factory("user")
+    if db.get_item(Key={'email': data['email']}).get('Item') is None:
+        logger.error("Signup failed: email already exists - %s", data['email'])
+        return {'status': 'fail', 'message': 'email already exists'}
     db.put_item(Item={'email': data['email'], 'password': data['password']})
-    return {'message': 'success'}
+
+    # Automatically send a verification email
+    ses_success = aws_service.ses_send_email(
+        target_email_address='hy2784@gmail.com',
+        subject='Welcome to Mulberry! Please verify your email!',
+        body='Hi<br>Please click this link to verify your email: ' + 'xxx' + '<br>' +
+        'Your verification link will expire in 30 minutes.'
+    )
+    if not ses_success:
+        logger.error('Email sent to %s failed!', data['email'])
+        return {'status': 'success', 'message': 'failed to send verification email'}
+
+    return {'status': 'success'}
 
 
 def login(event):
