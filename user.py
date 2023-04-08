@@ -1,5 +1,8 @@
 import json
 import logging
+from datetime import datetime
+
+import userhelper
 import aws_service
 
 logger = logging.getLogger()
@@ -7,25 +10,38 @@ logger.setLevel(logging.INFO)
 
 
 def signup(event) -> dict:
-    logger.info("signup")
+    logger.info('signup')
     data = json.loads(event['body'])
 
     # Create new user record in DynamoDB
     db = aws_service.dynamo_client_factory("user")
     if db.get_item(Key={'email': data['email']}).get('Item') is not None:
-        logger.error("Signup failed: email already exists - %s", data['email'])
+        logger.error("Signup failed: email already exists - {}", data['email'])
         return {'status': 'fail', 'message': 'email already exists'}
-    db.put_item(Item={'email': data['email'], 'password': data['password']})
+
+    user = {
+        'email': data['email'],
+        'status': 'PENDING',
+        'password': data['password'],
+        'created_ts': datetime.now(),
+        'email_verified': False
+    }
+    db.put_item(Item=user)
 
     # Automatically send a verification email
-    ses_success = aws_service.ses_send_email(
-        target_email_address=data['email'],
-        subject='Welcome to Mulberry! Please verify your email!',
-        body='Hi<br>Please click this link to verify your email: ' + 'xxx' + '<br>' +
-        'Your verification link will expire in 30 minutes.'
-    )
+    ses_success = False
+    verification_link = userhelper.verification_link_generator(data['email'])
+    if verification_link is not None:
+        ses_success = aws_service.ses_send_email(
+            target_email_address=data['email'],
+            subject='Welcome to Mulberry! Please verify your email!',
+            body='Hi<br><br>Welcome to Mulberry!<br><br>' +
+                 'Please click this link to verify your email: ' +
+                 '<a href="' + verification_link + '" target="_blank">' + verification_link + 'Visit W3Schools!</a><br>' +
+                 'Your verification link will expire in 30 minutes.<br><br><br>Cheers,<br>Mulberry'
+        )
     if not ses_success:
-        logger.error('Email sent to %s failed!', data['email'])
+        logger.error('Email sent to {} failed!', data['email'])
         return {'status': 'success', 'message': 'failed to send verification email'}
 
     return {'status': 'success'}
@@ -50,6 +66,21 @@ def resend_verification(event):
 def verify(event):
     logger.info("verify")
 
+    # Verify the verification code passed in by path
+    verification_code = event['path'].split('/')[-1]
+    result = userhelper.verification_code_verifier(verification_code)
+    if result is None:
+        logger.error("Verification failed: no code is found in Redis, key - {}", verification_code)
+        return {'status': 'fail', 'message': 'Either verification is expired or already verified'}
+
+    # Update the user info
+    db = aws_service.dynamo_client_factory('user')
+    user = db.get_item(Key={'email': result})
+    user['email_verified'] = True
+    db.put_item(Item=user)
+
+    return {'status': 'success'}
+
 
 def get_user(event):
     logger.info("get_user")
@@ -69,7 +100,7 @@ function_register = {
     # ('/user/logout', 'POST'): logout,
     # ('/user/password', 'PUT'): change_password,
     # ('/user/verify/resend/{user_id}', 'POST'): resend_verification,
-    # ('/user/verify/{token}', 'POST'): verify,
+    ('/user/verify/{token}', 'POST'): verify,
     # ('/user/{user_id}', 'GET'): get_user,
     # ('/user/{user_id}', 'POST'): create_user,
     # ('/user/{user_id}', 'PUT'): update_user

@@ -1,5 +1,6 @@
 import boto3
 import logging
+from redis import RedisCluster
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -17,7 +18,7 @@ def dynamo_client_factory(table: str):
     db = boto3.resource('dynamodb')
     db_table = dynamo_tables.get(table)
     if db_table is None:
-        logger.error("No DynamoDB Table %s", table)
+        logger.error("No DynamoDB Table {}", table)
         raise RuntimeError("Can't create dynamo db client")
     return db.Table(db_table)
 
@@ -35,11 +36,23 @@ def ses_send_email(target_email_address: str,
             Destination={'ToAddresses': [target_email_address]},
             Message=message
         )
-        logger.info("Email send successfully: target - %s, body - %s",
+        logger.info("Email send successfully: target - {}, body - {}",
                     target_email_address, body)
         return True
     except Exception as e:
-        logger.error("Failed to send email: target - %s, body - %s",
+        logger.error("Failed to send email: target - {}, body - {}",
                      target_email_address, body)
         logger.error(e)
         return False
+
+
+def redis_client_factory():
+    redis_client = RedisCluster(
+        startup_nodes=[{"host": "mulberry-radis-cache-0001-001.7tlweq.0001.use1.cache.amazonaws.com", "port": "6379"}],
+        decode_responses=True,
+        skip_full_coverage_check=True)
+
+    if not redis_client.ping():
+        logging.error("Cannot connect to Radis Server")
+        return None
+    return redis_client

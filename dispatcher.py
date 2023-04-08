@@ -14,7 +14,7 @@ def request_dispatcher(event, context):
         module_name = event['resource'].split("/")[1]
 
         if module_name is None:
-            logger.error("Can't find proper request handler: resource - %s, module - %s",
+            logger.error("Can't find proper request handler: resource - {}, module - {}",
                          event['resource'], module_name)
             return {
                 'statusCode': 400,
