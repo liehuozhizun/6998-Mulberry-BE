@@ -23,7 +23,7 @@ def signup(event) -> dict:
         'email': data['email'],
         'status': 'PENDING',
         'password': data['password'],
-        'created_ts': datetime.now(),
+        'created_ts': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         'email_verified': False
     }
     db.put_item(Item=user)

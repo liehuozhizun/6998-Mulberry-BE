@@ -1,14 +1,6 @@
 import boto3
 import logging
 
-import elasticache_auto_discovery
-from pymemcache.client.hash import HashClient
-
-import redis
-from redis.cluster import ClusterNode
-
-from redis import RedisCluster
-
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -17,7 +9,8 @@ dynamo_tables = {
     "activity": "mulberry-activity",
     "coupon": "mulberry-coupon",
     "interest": "mulberry-interest",
-    "message": "mulberry-message"
+    "message": "mulberry-message",
+    "cache": "mulberry-cache"
 }
 
 
@@ -51,24 +44,3 @@ def ses_send_email(target_email_address: str,
                      target_email_address, body)
         logger.exception(e)
         return False
-
-
-def redis_client_factory():
-    # elasticache settings
-    elasticache_config_endpoint = "mulberry-radis-cache-0001-001.7tlweq.0001.use1.cache.amazonaws.com:6379"
-    nodes = elasticache_auto_discovery.discover(elasticache_config_endpoint)
-    nodes = map(lambda x: (x[1], int(x[2])), nodes)
-    memcache_client = HashClient(nodes)
-
-    # redis_client = RedisCluster(
-    #     startup_nodes=[ClusterNode(
-    #         host="mulberry-radis-cache-0001-001.7tlweq.0001.use1.cache.amazonaws.com",
-    #         port=6379
-    #     )],
-    #     decode_responses=True,
-    #     skip_full_coverage_check=True)
-
-    if not redis_client.ping():
-        logging.error("Cannot connect to Radis Server")
-        return None
-    return redis_client
