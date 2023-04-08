@@ -16,7 +16,7 @@ def signup(event) -> dict:
     # Create new user record in DynamoDB
     db = aws_service.dynamo_client_factory("user")
     if db.get_item(Key={'email': data['email']}).get('Item') is not None:
-        logger.error("Signup failed: email already exists - {}", data['email'])
+        logger.error("Signup failed: email already exists - %s", data['email'])
         return {'status': 'fail', 'message': 'email already exists'}
 
     user = {
@@ -41,7 +41,7 @@ def signup(event) -> dict:
                  'Your verification link will expire in 30 minutes.<br><br><br>Cheers,<br>Mulberry'
         )
     if not ses_success:
-        logger.error('Email sent to {} failed!', data['email'])
+        logger.error('Email sent to %s failed!', data['email'])
         return {'status': 'success', 'message': 'failed to send verification email'}
 
     return {'status': 'success'}
@@ -70,7 +70,7 @@ def verify(event):
     verification_code = event['path'].split('/')[-1]
     result = userhelper.verification_code_verifier(verification_code)
     if result is None:
-        logger.error("Verification failed: no code is found in Redis, key - {}", verification_code)
+        logger.error("Verification failed: no code is found in Redis, key - %s", verification_code)
         return {'status': 'fail', 'message': 'Either verification is expired or already verified'}
 
     # Update the user info
