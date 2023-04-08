@@ -37,7 +37,7 @@ def signup(event) -> dict:
             subject='Welcome to Mulberry! Please verify your email!',
             body='Hi<br><br>Welcome to Mulberry!<br><br>' +
                  'Please click this link to verify your email: ' +
-                 '<a href="' + verification_link + '" target="_blank">' + verification_link + 'Visit W3Schools!</a><br>' +
+                 '<a href="' + verification_link + '" target="_blank">' + verification_link + '</a><br>' +
                  'Your verification link will expire in 30 minutes.<br><br><br>Cheers,<br>Mulberry'
         )
     if not ses_success:
@@ -75,7 +75,7 @@ def verify(event):
 
     # Update the user info
     db = aws_service.dynamo_client_factory('user')
-    user = db.get_item(Key={'email': result})
+    user = db.get_item(Key={'email': result}).get('Item')
     user['email_verified'] = True
     db.put_item(Item=user)
 
