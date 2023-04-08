@@ -42,7 +42,7 @@ def ses_send_email(target_email_address: str,
     except Exception as e:
         logger.error("Failed to send email: target - {}, body - {}",
                      target_email_address, body)
-        logger.error(e)
+        logger.exception(e)
         return False
 
 

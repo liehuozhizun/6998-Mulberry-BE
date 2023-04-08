@@ -34,7 +34,7 @@ def request_dispatcher(event, context):
         }
     except Exception as e:
         logger.error("Unhandled Exception occurs!")
-        logger.error(e)
+        logger.exception(e)
         return {
             'statusCode': 500,
             'body': '{"status": "fail", "message":"Unhandled Exception occurs"}'
