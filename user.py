@@ -29,38 +29,58 @@ def signup(event) -> dict:
     db.put_item(Item=user)
 
     # Automatically send a verification email
-    ses_success = False
-    verification_link = userhelper.verification_link_generator(data['email'])
-    if verification_link is not None:
-        ses_success = aws_service.ses_send_email(
-            target_email_address=data['email'],
-            subject='Welcome to Mulberry! Please verify your email!',
-            body='Hi<br><br>Welcome to Mulberry!<br><br>' +
-                 'Please click this link to verify your email: ' +
-                 '<a href="' + verification_link + '" target="_blank">' + verification_link + '</a><br>' +
-                 'Your verification link will expire in 30 minutes.<br><br><br>Cheers,<br>Mulberry'
-        )
-    if not ses_success:
-        logger.error('Email sent to %s failed!', data['email'])
-        return {'status': 'success', 'message': 'failed to send verification email'}
+    success = userhelper.verification_email_sender(data['email'])
+    if not success:
+        return {'status': 'success', 'message': 'Failed to send verification email'}
 
     return {'status': 'success'}
 
 
 def login(event):
     logger.info("login")
+    data = json.loads(event['body'])
 
+    db = aws_service.dynamo_client_factory('user')
+    user = db.get_item(Key={'email': data['email']}).get('Item')
 
-def logout(event):
-    logger.info("logout")
+    if user is None:
+        return {'status': 'fail', 'message': 'User doesn\'t exist'}
+    if user['password'] != data['password']:
+        return {'status': 'fail', 'message': 'Wrong password'}
+
+    user['password'] = None
+    return {'status': 'success', 'data': user}
 
 
 def change_password(event):
     logger.info("change_password")
+    data = json.loads(event['body'])
+
+    db = aws_service.dynamo_client_factory('user')
+    user = db.get_item(Key={'email': data['email']}).get('Item')
+    user['password'] = data['password']
+    db.put_item(Item=user)
+
+    return {'status': 'success'}
 
 
 def resend_verification(event):
     logger.info("resend_verification")
+    email = event['path'].split('/')[-1]
+
+    # Check if user exists or has been verified
+    db = aws_service.dynamo_client_factory('user')
+    user = db.get_item(Key={'email': email}).get('Item')
+    if user is None or user['email_verified'] is True:
+        logger.info('User - %s email has been verified or user not exists')
+        return {'status': 'fail', 'message': 'Email has been verified or user not exists!'}
+
+    # Send out verification email
+    success = userhelper.verification_email_sender(email)
+    if not success:
+        return {'status': 'fail', 'message': 'Failed to send verification email'}
+
+    return {'status': 'success'}
 
 
 def verify(event):
@@ -84,26 +104,36 @@ def verify(event):
 
 def get_user(event):
     logger.info("get_user")
-
-
-def create_user(event):
-    logger.info("create_user")
+    email = event['path'].split('/')[-1]
+    db = aws_service.dynamo_client_factory('user')
+    user = db.get_item(Key={'email': email}).get('Item')
+    user['password'] = None
+    return {'status': 'success', 'data': user}
 
 
 def update_user(event):
-    logger.info("update_user")
+    logger.info("create_user")
+    user_new = json.loads(event['body'])
+
+    db = aws_service.dynamo_client_factory('user')
+    user_old = db.get_item(Key={'email': user_new['email']}).get('Item')
+
+    user_new['password'] = user_old['password']
+    user_new['created_ts'] = user_old['created_ts']
+    user_new['email_verified'] = user_old['email_verified']
+    user_new['status'] = 'ACTIVE'
+
+    return {'status': 'success'}
 
 
 function_register = {
     ('/user/signup', 'POST'): signup,
-    # ('/user/login', 'POST'): login,
-    # ('/user/logout', 'POST'): logout,
-    # ('/user/password', 'PUT'): change_password,
-    # ('/user/verify/resend/{user_id}', 'POST'): resend_verification,
+    ('/user/login', 'POST'): login,
+    ('/user/password', 'PUT'): change_password,
+    ('/user/verify/resend/{user_id}', 'POST'): resend_verification,
     ('/user/verify/{token}', 'POST'): verify,
-    # ('/user/{user_id}', 'GET'): get_user,
-    # ('/user/{user_id}', 'POST'): create_user,
-    # ('/user/{user_id}', 'PUT'): update_user
+    ('/user/{user_id}', 'GET'): get_user,
+    ('/user/{user_id}', 'PUT'): update_user
 }
 
 

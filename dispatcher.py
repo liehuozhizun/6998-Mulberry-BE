@@ -39,13 +39,3 @@ def request_dispatcher(event, context):
             'statusCode': 500,
             'body': '{"status": "fail", "message":"Unhandled Exception occurs"}'
         }
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    response = request_dispatcher({
-        'resource': '/user/signup',
-        'httpMethod': 'POST',
-        'body': '{"email": "hy2784@gmail.com", "password": "123456"}'
-    }, {})
-    print(response)

@@ -37,3 +37,22 @@ def verification_code_verifier(code: str) -> str or None:
                 batch.delete_item(Key={'key': item['key']})
 
     return res
+
+
+def verification_email_sender(email: str) -> bool:
+    ses_success = False
+    verification_link = verification_link_generator(email)
+    if verification_link is not None:
+        ses_success = aws_service.ses_send_email(
+            target_email_address=email,
+            subject='Welcome to Mulberry! Please verify your email!',
+            body='Hi<br><br>Welcome to Mulberry!<br><br>' +
+                 'Please click this link to verify your email: ' +
+                 '<a href="' + verification_link + '" target="_blank">' + verification_link + '</a><br>' +
+                 'Your verification link will expire in 30 minutes.<br><br><br>Cheers,<br>Mulberry'
+        )
+    if not ses_success:
+        logger.error('Email sent to %s failed!', email)
+        return False
+
+    return True
