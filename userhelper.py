@@ -7,7 +7,7 @@ import aws_service
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-API_GATEWAY_BASE_URL = 'https://d0ch1hik23.execute-api.us-east-1.amazonaws.com/v1'
+FRONTEND_BASE_URL = 'https://d0ch1hik23.execute-api.us-east-1.amazonaws.com/v1'
 CACHE_DYNAMO_NAME = 'cache'
 
 
@@ -16,7 +16,7 @@ def verification_link_generator(email: str) -> str or None:
     verification_code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
     cache.put_item(Item={'key': verification_code, 'email': email, 'purpose': 'email_verification'})
 
-    return API_GATEWAY_BASE_URL + '/user/verify/' + verification_code
+    return FRONTEND_BASE_URL + '/user/verify/' + verification_code
 
 
 def verification_code_verifier(code: str) -> str or None:

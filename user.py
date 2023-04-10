@@ -123,6 +123,8 @@ def update_user(event):
     user_new['email_verified'] = user_old['email_verified']
     user_new['status'] = 'ACTIVE'
 
+    db.put_item(Item=user_new)
+
     return {'status': 'success'}
 
 
