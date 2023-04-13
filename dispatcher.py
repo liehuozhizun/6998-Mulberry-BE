@@ -18,6 +18,11 @@ def request_dispatcher(event, context):
                          event['resource'], module_name)
             return {
                 'statusCode': 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': '*'
+                },
                 'body': '{"status": "fail", "message":"No proper handler found for the endpoint"}'
             }
 
@@ -30,6 +35,11 @@ def request_dispatcher(event, context):
         logger.info('-------------------------')
         return {
             'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             'body': json.dumps(resp)
         }
     except Exception as e:
@@ -37,5 +47,10 @@ def request_dispatcher(event, context):
         logger.exception(e)
         return {
             'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             'body': '{"status": "fail", "message":"Unhandled Exception occurs"}'
         }
