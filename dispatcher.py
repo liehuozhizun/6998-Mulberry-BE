@@ -53,12 +53,22 @@ def request_dispatcher(event, context):
         logger.error("No token is present")
         return {
             'statusCode': 401,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             'body': '{"status": "fail", "message":"No token is present"}'
         }
     except Authentication403Exception:
         logger.error("Token is invalid or expires")
         return {
             'statusCode': 403,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': '*'
+            },
             'body': '{"status": "fail", "message":"Token is invalid or expires"}'
         }
     except Exception as e:
