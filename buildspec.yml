@@ -5,9 +5,9 @@ phases:
       python: 3.9
     commands:
       - echo "Installing dependencies..."
-      - pip install pyjwt
   build:
     commands:
+      - pip install pyjwt
       - echo "Zipping upload package..."
       - zip -r backend.zip .
       - echo "Uploading lambda Function..."
