@@ -16,7 +16,11 @@ AUTHENTICATION_DISABLED_RESOURCES = [
 
 
 def parseEmail(_event: dict) -> str:
-    token = _event['headers'].get('token')
+    try:
+        token = _event['headers']['token']
+    except (KeyError, TypeError):
+        token = None
+
     if token is None:
         if _event['resource'] not in AUTHENTICATION_DISABLED_RESOURCES:
             raise Authentication401Exception
@@ -24,7 +28,10 @@ def parseEmail(_event: dict) -> str:
     else:
         # For TEST_USER_TOKEN, use the 'email' field in query param
         if token == TEST_USER_TOKEN:
-            return _event['queryStringParameters'].get('email')
+            try:
+                return _event['queryStringParameters']['email']
+            except (KeyError, TypeError):
+                return TEST_USER_EMAIL
 
         # Decode the token
         try:
