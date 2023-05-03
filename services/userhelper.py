@@ -2,7 +2,7 @@ import logging
 import random
 import string
 
-import aws_service
+from services import aws_service
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

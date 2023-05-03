@@ -1,3 +1,5 @@
+from services.authentication_service import *
+
 import json
 import logging
 import importlib
@@ -11,8 +13,8 @@ def request_dispatcher(event, context):
     logger.info(event)
 
     try:
+        # parse the module_name based on resource
         module_name = event['resource'].split("/")[1]
-
         if module_name is None:
             logger.error("Can't find proper request handler: resource - %s, module - %s",
                          event['resource'], module_name)
@@ -21,6 +23,11 @@ def request_dispatcher(event, context):
                 'body': '{"status": "fail", "message":"No proper handler found for the endpoint"}'
             }
 
+        # validate the input token and parse the user email
+        current_user_email = parseEmail(event)
+        event['current_user_email'] = current_user_email
+
+        # find the proper module and pass the request to the request handler
         module = importlib.import_module(module_name)
         handler = module.request_handler
         resp = handler(event)
@@ -32,6 +39,18 @@ def request_dispatcher(event, context):
             'statusCode': 200,
             'body': json.dumps(resp)
         }
+    except Authentication401Exception:
+        logger.error("No token is present")
+        return {
+            'statusCode': 401,
+            'body': '{"status": "fail", "message":"No token is present"}'
+        }
+    except Authentication403Exception:
+        logger.error("Token is invalid or expires")
+        return {
+            'statusCode': 403,
+            'body': '{"status": "fail", "message":"Token is invalid or expires"}'
+        }
     except Exception as e:
         logger.error("Unhandled Exception occurs!")
         logger.exception(e)
@@ -39,3 +58,5 @@ def request_dispatcher(event, context):
             'statusCode': 500,
             'body': '{"status": "fail", "message":"Unhandled Exception occurs"}'
         }
+    finally:
+        logger.info('-------------------------')

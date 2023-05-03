@@ -2,8 +2,7 @@ import json
 import logging
 from datetime import datetime
 
-import userhelper
-import aws_service
+from services import userhelper, aws_service
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -57,7 +56,7 @@ def change_password(event):
     data = json.loads(event['body'])
 
     db = aws_service.dynamo_client_factory('user')
-    user = db.get_item(Key={'email': data['email']}).get('Item')
+    user = db.get_item(Key={'email': event['email']}).get('Item')
     user['password'] = data['password']
     db.put_item(Item=user)
 
@@ -104,7 +103,7 @@ def verify(event):
 
 def get_user(event):
     logger.info("get_user")
-    email = event['path'].split('/')[-1]
+    email = event['queryStringParameters'].get('email')
     db = aws_service.dynamo_client_factory('user')
     user = db.get_item(Key={'email': email}).get('Item')
     user['password'] = None
@@ -116,7 +115,7 @@ def update_user(event):
     user_new = json.loads(event['body'])
 
     db = aws_service.dynamo_client_factory('user')
-    user_old = db.get_item(Key={'email': user_new['email']}).get('Item')
+    user_old = db.get_item(Key={'email': event['email']})['Item']
 
     user_new['password'] = user_old['password']
     user_new['created_ts'] = user_old['created_ts']
@@ -132,10 +131,10 @@ function_register = {
     ('/user/signup', 'POST'): signup,
     ('/user/login', 'POST'): login,
     ('/user/password', 'PUT'): change_password,
-    ('/user/verify/resend/{user_id}', 'POST'): resend_verification,
+    ('/user/verify/resend/{email}', 'POST'): resend_verification,
     ('/user/verify/{token}', 'POST'): verify,
-    ('/user/{user_id}', 'GET'): get_user,
-    ('/user/{user_id}', 'PUT'): update_user
+    ('/user', 'GET'): get_user,
+    ('/user', 'PUT'): update_user
 }
 
 
