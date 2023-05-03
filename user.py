@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 
 from services import userhelper, aws_service
+from services.authentication_service import generateJWTToken
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -32,7 +33,7 @@ def signup(event) -> dict:
     if not success:
         return {'status': 'success', 'message': 'Failed to send verification email'}
 
-    return {'status': 'success'}
+    return {'status': 'success', 'data': {'token': generateJWTToken(data['email'])}}
 
 
 def login(event):
@@ -48,6 +49,7 @@ def login(event):
         return {'status': 'fail', 'message': 'Wrong password'}
 
     user['password'] = None
+    user['token'] = generateJWTToken(data['email'])
     return {'status': 'success', 'data': user}
 
 
