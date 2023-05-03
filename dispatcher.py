@@ -24,7 +24,7 @@ def request_dispatcher(event, context):
             module_name = event['resource'].split("/")[1]
             if module_name is None:
                 raise ModuleNotFoundError
-            module = importlib.import_module('service.' + module_name)
+            module = importlib.import_module(module_name)
         except ModuleNotFoundError:
             logger.error("Can't find proper request handler: resource - %s, module - %s",
                          event['resource'], module_name)
