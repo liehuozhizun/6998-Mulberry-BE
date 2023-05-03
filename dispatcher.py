@@ -13,9 +13,19 @@ def request_dispatcher(event, context):
     logger.info(event)
 
     try:
-        # parse the module_name based on resource
-        module_name = event['resource'].split("/")[1]
-        if module_name is None:
+        # validate the input token and parse the user email
+        current_user_email = parseEmail(event)
+        event['current_user_email'] = current_user_email
+
+        # find the proper module and pass the request to the request handler
+        module_name = None
+        try:
+            # parse the module_name based on resource
+            module_name = event['resource'].split("/")[1]
+            if module_name is None:
+                raise ModuleNotFoundError
+            module = importlib.import_module('service.' + module_name)
+        except ModuleNotFoundError:
             logger.error("Can't find proper request handler: resource - %s, module - %s",
                          event['resource'], module_name)
             return {
@@ -28,12 +38,6 @@ def request_dispatcher(event, context):
                 'body': '{"status": "fail", "message":"No proper handler found for the endpoint"}'
             }
 
-        # validate the input token and parse the user email
-        current_user_email = parseEmail(event)
-        event['current_user_email'] = current_user_email
-
-        # find the proper module and pass the request to the request handler
-        module = importlib.import_module(module_name)
         handler = module.request_handler
         resp = handler(event)
 
