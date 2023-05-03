@@ -7,7 +7,7 @@ phases:
       - echo "Installing dependencies..."
   build:
     commands:
-      - pip install pyjwt
+      - pip install pyjwt --target .
       - echo "Zipping upload package..."
       - zip -r backend.zip .
       - echo "Uploading lambda Function..."
