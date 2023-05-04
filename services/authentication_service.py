@@ -17,7 +17,7 @@ AUTHENTICATION_DISABLED_RESOURCES = [
 
 def parseEmail(_event: dict) -> str:
     try:
-        token = _event['headers']['token']
+        token = _event['headers']['Authorization']
     except (KeyError, TypeError):
         token = None
 

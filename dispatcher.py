@@ -14,8 +14,7 @@ def request_dispatcher(event, context):
 
     try:
         # validate the input token and parse the user email
-        current_user_email = parseEmail(event)
-        event['current_user_email'] = current_user_email
+        event['email'] = parseEmail(event)
 
         # find the proper module and pass the request to the request handler
         module_name = None

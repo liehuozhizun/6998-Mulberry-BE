@@ -105,7 +105,7 @@ def verify(event):
 
 def get_user(event):
     logger.info("get_user")
-    email = event['queryStringParameters'].get('email')
+    email = event['email']
     db = aws_service.dynamo_client_factory('user')
     user = db.get_item(Key={'email': email}).get('Item')
     user['password'] = None
@@ -123,6 +123,7 @@ def update_user(event):
     user_new['created_ts'] = user_old['created_ts']
     user_new['email_verified'] = user_old['email_verified']
     user_new['status'] = 'ACTIVE'
+    user_new.pop('Authorization', None)
 
     db.put_item(Item=user_new)
 
