@@ -8,7 +8,7 @@ dynamo_tables = {
     "user": "mulberry-user",
     "activity": "mulberry-activity",
     "coupon": "mulberry-coupon",
-    "interest": "mulberry-interest",
+    "match": "mulberry-match",
     "message": "mulberry-message",
     "cache": "mulberry-cache"
 }
