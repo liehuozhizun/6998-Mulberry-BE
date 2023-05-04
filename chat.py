@@ -102,9 +102,9 @@ def get_chat_list(event):
         data.append({
             'email': another_email,
             'name': user_db.get_item(Key={'email': another_email}).get('Item', {}).get('name'),
-            'message': message_history_entity['message'],
+            'message': message_history_entity['messages'][-1]['message'],
             'read': message_history_entity[email],
-            'timestamp': message_history_entity['timestamp']
+            'timestamp': message_history_entity['messages'][-1]['timestamp']
         })
 
     return {'status': 'success', 'data': data}
