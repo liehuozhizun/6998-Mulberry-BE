@@ -31,7 +31,7 @@ def signup(event) -> dict:
     # Automatically send a verification email
     success = userhelper.verification_email_sender(data['email'])
     if not success:
-        return {'status': 'success', 'message': 'Failed to send verification email'}
+        return {'status': 'fail', 'message': 'Failed to send verification email'}
 
     return {'status': 'success', 'data': {'token': generateJWTToken(data['email'])}}
 
