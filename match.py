@@ -32,13 +32,13 @@ def make_new_match(email: str) -> list:
     Only the top-10 potential matched users will be returned.
     """
     user_db = aws_service.dynamo_client_factory("user")
-    user = user_db.get_item(Key={'email': email})
+    user = user_db.get_item(Key={'email': email}).get('Item')
     expected_gender = 'female' if user['gender'] == 'male' else 'male'
     expected_location = user['location']
     expected_interest = [user['interest1'], user['interest2'], user['interest3']]
 
     potential_match = []
-    users = user_db.scan()
+    users = user_db.scan()['Items']
     for user in users:
         # Filter out not matching gender
         if user['gender'] != expected_gender:
@@ -77,7 +77,7 @@ def get_match(event: dict):
         }
         match_db.put_item(Item=match_record)
 
-    return {'statu': 'success', 'data': match_record['today']}
+    return {'status': 'success', 'data': match_record['today']}
 
 
 function_register = {
