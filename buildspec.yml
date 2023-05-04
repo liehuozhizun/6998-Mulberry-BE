@@ -8,6 +8,7 @@ phases:
   build:
     commands:
       - pip install pyjwt --target .
+      - rm -r PyJWT-2.6.0.dist-info
       - echo "Zipping upload package..."
       - zip -r backend.zip .
       - echo "Uploading lambda Function..."
