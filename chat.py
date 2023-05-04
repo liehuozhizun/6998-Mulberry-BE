@@ -81,9 +81,33 @@ def update_message_user_entity(email: str, message_history_key: str):
         db.put_item(Item=user_msg_entity)
 
 
+def get_another_user_by_history_key(message_history_key: str, current_email: str) -> str:
+    emails = message_history_key.split(DELIMITER)
+    emails.remove(current_email)
+    return emails[0]
+
+
 def get_chat_list(event):
     logger.info('get_chat_list')
-    pass
+    user_db = aws_service.dynamo_client_factory('user')
+    email = event['email']
+    data = []
+
+    message_history_keys = get_by_user_key(email)['message_history_keys']
+
+    # Iterate all message history of this user and collect the last message info
+    for history_key in message_history_keys:
+        message_history_entity = get_by_history_key(history_key)
+        another_email = get_another_user_by_history_key(history_key, email)
+        data.append({
+            'email': another_email,
+            'name': user_db.get_item(Key={'email': another_email}).get('Item', {}).get('name'),
+            'message': message_history_entity['message'],
+            'read': message_history_entity[email],
+            'timestamp': message_history_entity['timestamp']
+        })
+
+    return {'status': 'success', 'data': data}
 
 
 def get_messages(event):
@@ -119,9 +143,11 @@ def send_message(event):
     message_history[receiver_email] = False
     db.put_item(Item=message_history)
 
-    # Update message user key
+    # Update message user key: add message_history_key if not in user entity
     update_message_user_entity(sender_email, message_history_key)
     update_message_user_entity(receiver_email, message_history_key)
+
+    # TODO: Create an activity if both users reply in the conversation
 
     return {'status': 'success'}
 
