@@ -42,14 +42,14 @@ The key is a string but will have two formats:
 
 Note:
 0. We use DELIMITER const var for the connection of two emails. In this case, it's '---'.
-1. Use def message_key_generator to get the valid message_history_key. Enforcing use this
+1. Use def message_history_key_generator to get the valid message_history_key. Enforcing use this
     function to get the key will ensure we can locate the right message history.
 2. Use def get_by_user_key(message_user_key) to get the list of message_history_key.
 3. Use def get_by_history_key(message_history_key) to get the list of messages between users.
 """
 
 
-def message_key_generator(email1: str, email2: str) -> str:
+def message_history_key_generator(email1: str, email2: str) -> str:
     if email1 < email2:
         return f'{email1}{DELIMITER}{email2}'
     else:
@@ -88,7 +88,19 @@ def get_chat_list(event):
 
 def get_messages(event):
     logger.info('get_messages')
-    pass
+    email1 = event['email']
+    email2 = event['queryStringParameters']['target_user_email']
+
+    # Get the message history entity
+    message_history_key = message_history_key_generator(email1, email2)
+    message_history_entity = get_by_history_key(message_history_key)
+
+    # Update is_read for email1
+    if message_history_entity[email1] is False:
+        message_history_entity[email1] = True
+        db.put_item(Item=message_history_entity)
+
+    return {'status': 'success', 'data': message_history_entity['messages']}
 
 
 def send_message(event):
@@ -100,7 +112,7 @@ def send_message(event):
     message['sender_email'] = sender_email
 
     # Insert new message
-    message_history_key = message_key_generator(sender_email, receiver_email)
+    message_history_key = message_history_key_generator(sender_email, receiver_email)
     message_history = get_by_history_key(message_history_key)
     message_history['messages'].append(message)
     message_history[sender_email] = True
