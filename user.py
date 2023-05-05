@@ -130,6 +130,13 @@ def update_user(event):
     return {'status': 'success'}
 
 
+def get_photo_link(event):
+    logger.info("get_profile_link")
+    db = aws_service.dynamo_client_factory('user')
+    return {'status': 'success',
+            'data': {'link': db.get_item(Key={'email': event['email']})['Item'].get('photo')}}
+
+
 function_register = {
     ('/user/signup', 'POST'): signup,
     ('/user/login', 'POST'): login,
@@ -137,7 +144,8 @@ function_register = {
     ('/user/verify/resend/{email}', 'POST'): resend_verification,
     ('/user/verify/{token}', 'POST'): verify,
     ('/user', 'GET'): get_user,
-    ('/user', 'PUT'): update_user
+    ('/user', 'PUT'): update_user,
+    ('/user/photo', 'GET'): get_photo_link
 }
 
 
