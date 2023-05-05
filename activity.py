@@ -91,6 +91,8 @@ def accept_activity(event):
     logger.info('accept_activity')
     act_id = event['path'].split('/')[-1]
     act_entity = db.get_item(Key={'id': act_id}).get('Item')
+    email = event['email']
+    print(email)
     # if act_entity is not None:
     #     if name == act_entity['user1_name']:
     #         act_entity['user1_accept'] = True
