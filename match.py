@@ -40,6 +40,9 @@ def make_new_match(email: str) -> list:
     potential_match = []
     users = user_db.scan()['Items']
     for user in users:
+        if user['status'] != 'ACTIVE':
+            continue
+
         # Filter out not matching gender
         if user['gender'] != expected_gender:
             continue
