@@ -147,7 +147,22 @@ def send_message(event):
     update_message_user_entity(sender_email, message_history_key)
     update_message_user_entity(receiver_email, message_history_key)
 
-    # TODO: Create an activity if both users reply in the conversation
+
+    # whether both talk to each other
+    flag = 0
+    email_t = message_history['messages'][0]['sender_email']
+    for data in message_history['messages']:
+        if data['sender_email'] != email_t:
+            flag = 1
+            break
+
+    if flag == 1:
+        print('yes')
+
+        # create an activity
+
+
+        # store this activity to message db
 
     return {'status': 'success'}
 
