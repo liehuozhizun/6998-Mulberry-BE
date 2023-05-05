@@ -168,8 +168,20 @@ def send_message(event):
         except Exception:
             logger.error('insert message fail for' + sender_email + 'and' + receiver_email)
 
-
         # store this activity to message db
+        # Insert new message
+        message = '0'
+        message_history_key = message_history_key_generator(sender_email, receiver_email)
+        message_history = get_by_history_key(message_history_key)
+        message_history['messages'].append(message)
+        message_history[sender_email] = True
+        message_history[receiver_email] = False
+        db.put_item(Item=message_history)
+
+        # Update message user key: add message_history_key if not in user entity
+        update_message_user_entity(sender_email, message_history_key)
+        update_message_user_entity(receiver_email, message_history_key)
+
 
     return {'status': 'success'}
 
