@@ -1,6 +1,7 @@
 import json
 import logging
 
+import activity
 from services import aws_service
 
 logger = logging.getLogger()
@@ -156,10 +157,13 @@ def send_message(event):
             flag = 1
             break
 
+    # both people send message
     if flag == 1:
-        print('yes')
-
         # create an activity
+        try:
+            act_id = activity.insert_activity(sender_email, receiver_email)
+        except Exception:
+            logger.error('insert message fail for' + sender_email + 'and' + receiver_email)
 
 
         # store this activity to message db
