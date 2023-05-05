@@ -105,7 +105,7 @@ def verify(event):
 
 def get_user(event):
     logger.info("get_user")
-    email = event['email']
+    email = event['queryStringParameters']['email']
     db = aws_service.dynamo_client_factory('user')
     user = db.get_item(Key={'email': email}).get('Item')
     user['password'] = None
