@@ -148,6 +148,9 @@ def send_message(event):
     update_message_user_entity(sender_email, message_history_key)
     update_message_user_entity(receiver_email, message_history_key)
 
+    # check whether already have activity
+    if activity.check_activity(sender_email, receiver_email):
+        return {'status': 'success'}
 
     # whether both talk to each other
     flag = 0
