@@ -65,7 +65,7 @@ def check_activity(user1, user2):
     act_id = chat.message_history_key_generator(user1, user2)
     act_entity = db.get_item(Key={'id': act_id}).get('Item')
 
-    if act_entity is None:
+    if act_entity is not None:
         return True
     else:
         return False
