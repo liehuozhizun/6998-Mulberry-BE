@@ -13,6 +13,7 @@ activity_name = ['A', 'B', 'C', 'D', 'E', 'F']
 advertiser_name = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF']
 address = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
 discount = ['10%', '20%', '30%', '40%', '50%', '60%']
+price = ['1000', '2000', '3000', '4000', '3500', '4500']
 
 """
 Activity Architecture
@@ -28,7 +29,8 @@ In the DynamoDB table 'activity', every data entity has a 'id' as partition key.
     "user1_email" : string,
     "user2_email" : string,
     "user2_accept" : bool,
-    "user1_accept" : bool
+    "user1_accept" : bool，
+    "origin_price" : string
 }
 """
 
@@ -55,7 +57,8 @@ def insert_activity(user1, user2):
         "user1_email" : user1,
         "user2_email" : user2,
         "user1_accept" : False,
-        "user2_accept" : False
+        "user2_accept" : False,
+        "origin_price" : price[act_index]
     }
 
     db.put_item(Item=activity_entity)
