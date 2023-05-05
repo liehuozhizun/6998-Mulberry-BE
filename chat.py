@@ -163,6 +163,7 @@ def send_message(event):
     # both people send message
     if flag == 1:
         # create an activity
+        act_id = 'error'
         try:
             act_id = activity.insert_activity(sender_email, receiver_email)
         except Exception:
@@ -170,7 +171,11 @@ def send_message(event):
 
         # store this activity to message db
         # Insert new message
-        message = '0'
+
+        message = json.loads(event['body'])
+        message['sender_email'] = '0'
+        message['message'] = act_id
+
         message_history_key = message_history_key_generator(sender_email, receiver_email)
         message_history = get_by_history_key(message_history_key)
         message_history['messages'].append(message)
