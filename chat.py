@@ -171,7 +171,6 @@ def send_message(event):
 
         # store this activity to message db
         # Insert new message
-
         message = json.loads(event['body'])
         message['sender_email'] = '0'
         message['message'] = act_id

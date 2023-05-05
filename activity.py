@@ -1,6 +1,5 @@
 import logging
 import random
-from datetime import datetime
 
 import chat
 from services import aws_service
@@ -14,6 +13,7 @@ activity_name = ['A', 'B', 'C', 'D', 'E', 'F']
 advertiser_name = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF']
 address = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
 discount = ['10%', '20%', '30%', '40%', '50%', '60%']
+date = ['2023-12-25', '2023-12-25', '2023-12-25', '2023-12-25', '2023-12-25', '2023-12-25']
 
 """
 Activity Architecture
@@ -47,7 +47,7 @@ def insert_activity(user1, user2):
         "advertiser_name" : advertiser_name[act_index],
         "address" : address[act_index],
         "discount" : discount[act_index],
-        "valid_through" : datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "valid_through" : date[act_index],
         "user1_name" : user1,
         "user2_name" : user2,
         'status' : 'PENDING',
@@ -71,20 +71,22 @@ def check_activity(user1, user2):
         return False
 
 # get activity info
-def get_activity(user1, user2):
+def get_activity(event):
     logger.info('get_activity')
-    act_id = chat.message_history_key_generator(user1, user2)
-    act_entity = db.get_item(Key={'id': act_id}).get('Item')
-
-    if act_entity is None:
-        return True
-    else:
-        return False
+    print(event)
+    # act_id = chat.message_history_key_generator(event['user1_name'], event['user1_name'])
+    # act_id = event['path'].split('/')[-1]
+    # act_entity = db.get_item(Key={'id': act_id}).get('Item')
+    #
+    # if act_entity is not None:
+    #     return  {'status': 'success', 'data': act_entity}
+    # else:
+    #     return  {'status': 'fail', 'data': 'no such activity'}
 
 
 # accept activity
-def accept_activity():
-    logger.info('send_message')
+def accept_activity(user):
+    logger.info('accept_activity')
     pass
 
 
