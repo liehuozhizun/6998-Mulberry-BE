@@ -13,7 +13,6 @@ activity_name = ['A', 'B', 'C', 'D', 'E', 'F']
 advertiser_name = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF']
 address = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
 discount = ['10%', '20%', '30%', '40%', '50%', '60%']
-date = ['2023-12-25', '2023-12-25', '2023-12-25', '2023-12-25', '2023-12-25', '2023-12-25']
 
 """
 Activity Architecture
@@ -24,10 +23,10 @@ In the DynamoDB table 'activity', every data entity has a 'id' as partition key.
     "advertiser_name" : string,
     "address" : string,
     "discount" : string,
-    "valid_through" : string,
     "user1_name" : string,
     "user2_name" : string,
-    "status" : string
+    "user1_email" : string,
+    "user2_email" : string,
     "user2_accept" : bool,
     "user1_accept" : bool
 }
@@ -41,18 +40,22 @@ def insert_activity(user1, user2):
     act_id = chat.message_history_key_generator(user1, user2)
     act_index = random.randint(0, len(activity_name)-1)
 
+    db_user = aws_service.dynamo_client_factory('user')
+    user_1 = db_user.get_item(Key={'email': user1}).get('Item')
+    user_2 = db_user.get_item(Key={'email': user2}).get('Item')
+
     activity_entity = {
         "id" : act_id,
         "activity_name" : activity_name[act_index],
         "advertiser_name" : advertiser_name[act_index],
         "address" : address[act_index],
         "discount" : discount[act_index],
-        "valid_through" : date[act_index],
-        "user1_name" : user1,
-        "user2_name" : user2,
-        'status' : 'PENDING',
-        "user2_accept" : False,
-        "user1_accept" : False
+        "user1_name" : user_1['name'],
+        "user2_name" : user_2['name'],
+        "user1_email" : user1,
+        "user2_email" : user2,
+        "user1_accept" : False,
+        "user2_accept" : False
     }
 
     db.put_item(Item=activity_entity)
@@ -73,27 +76,35 @@ def check_activity(user1, user2):
 # get activity info
 def get_activity(event):
     logger.info('get_activity')
-    print(event)
-    # act_id = chat.message_history_key_generator(event['user1_name'], event['user1_name'])
-    # act_id = event['path'].split('/')[-1]
-    # act_entity = db.get_item(Key={'id': act_id}).get('Item')
-    #
-    # if act_entity is not None:
-    #     return  {'status': 'success', 'data': act_entity}
-    # else:
-    #     return  {'status': 'fail', 'data': 'no such activity'}
+
+    act_id = event['path'].split('/')[-1]
+    act_entity = db.get_item(Key={'id': act_id}).get('Item')
+
+    if act_entity is not None:
+        return  {'status': 'success', 'data': act_entity}
+    else:
+        return  {'status': 'fail', 'data': 'no such activity'}
 
 
 # accept activity
-def accept_activity(user):
+def accept_activity(event):
     logger.info('accept_activity')
-    pass
+    act_entity = db.get_item(Key={'id': act_id}).get('Item')
+    if act_entity is not None:
+        if name == act_entity['user1_name']:
+            act_entity['user1_accept'] = True
+        else:
+            act_entity['user2_accept'] = True
+
+    else:
+        return  {'status': 'fail', 'data': 'no such activity'}
+
 
 
 
 function_register = {
-    ('/activity/activity_id', 'GET'): get_activity,
-    ('/activity/status/activity_id', 'PUT'): accept_activity
+    ('/activity/{activity_id}', 'GET'): get_activity,
+    ('/activity/status/{activity_id}', 'PUT'): accept_activity
 }
 
 def request_handler(_event):
