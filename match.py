@@ -73,7 +73,7 @@ def get_match(event: dict):
     match_record = match_db.get_item(Key={'email': email}).get('Item')
 
     # This user has no previous match results
-    if match_record is None:
+    if match_record is None or len(match_record['today']) == 0:
         match_record = {
             'email': email,
             'today': make_new_match(email)
