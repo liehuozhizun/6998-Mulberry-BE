@@ -132,9 +132,10 @@ def update_user(event):
 
 def get_photo_link(event):
     logger.info("get_profile_link")
+    email = event['queryStringParameters']['email']
     db = aws_service.dynamo_client_factory('user')
     return {'status': 'success',
-            'data': {'link': db.get_item(Key={'email': event['email']})['Item'].get('photo')}}
+            'data': {'link': db.get_item(Key={'email': email})['Item'].get('photo')}}
 
 
 function_register = {
