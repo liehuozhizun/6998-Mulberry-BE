@@ -13,7 +13,7 @@ activity_name = ['A', 'B', 'C', 'D', 'E', 'F']
 advertiser_name = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF']
 address = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
 discount = ['10%', '20%', '30%', '40%', '50%', '60%']
-price = [1000, 2000, 3000, 4000, 3500, 4500]
+price = ['1000', '2000', '3000', '4000', '3500', '4500']
 
 """
 Activity Architecture
