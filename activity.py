@@ -9,11 +9,40 @@ logger.setLevel(logging.INFO)
 
 db = aws_service.dynamo_client_factory("activity")
 
-activity_name = ['A', 'B', 'C', 'D', 'E', 'F']
-advertiser_name = ['AA', 'BB', 'CC', 'DD', 'EE', 'FF']
-address = ['AAA', 'BBB', 'CCC', 'DDD', 'EEE', 'FFF']
-discount = ['10%', '20%', '30%', '40%', '50%', '60%']
-price = ['1000', '2000', '3000', '4000', '3500', '4500']
+activity_name = ['Helicopter Tour: Ultimate Manhattan Sightseeing',
+                 'Statue of Liberty and New York City Skyline Sightseeing Cruise',
+                 'Manhattan Architecture Yacht Cruise',
+                 'Chinatown and Little Italy Food Fest',
+                 'Bateaux New York Premier Dinner Cruise',
+                 'Niagara Falls in One Day from New York City',
+                 'Skip-the-Line Metropolitan Museum of Art - Exclusive Guided Tour',
+                 'Private Tour New York City in the Gilded Age: A History of High Society']
+advertiser_name = ['HeliNY',
+                   'Classic Harbor Line',
+                   'Classic Harbor Line',
+                   'Ahoy New York Food Tours',
+                   'Bateaux New York',
+                   'Amigo Tours',
+                   'Babylon Tours New York City',
+                   'New York Historical Tours']
+address = ['6 East River Piers',
+           '62 Chelsea Piers',
+           '62 Chelsea Piers',
+           'Silk Road Cafe',
+           'Chelsea Piers',
+           'Niagara Falls State Park',
+           'The Metropolitan Museum of Art',
+           '764 Central Park S']
+discount = ['10%', '20%', '30%', '40%', '50%', '60%','35%','22%']
+price = ['289', '128', '112', '125', '192', '552', '126','300']
+arr_time = ['2023/5/20, 10am',
+            '2023/5/21, 10am',
+            '2023/5/20, 11am',
+            '2023/5/20, 12am',
+            '2023/5/20, 8am',
+            '2023/5/21, 8am',
+            '2023/5/13, 10am',
+            '2023/5/14, 10am']
 
 """
 Activity Architecture
@@ -58,7 +87,8 @@ def insert_activity(user1, user2):
         "user2_email" : user2,
         "user1_accept" : False,
         "user2_accept" : False,
-        "origin_price" : price[act_index]
+        "origin_price" : price[act_index],
+        'arrange_time' : arr_time[act_index]
     }
 
     db.put_item(Item=activity_entity)
